@@ -21,7 +21,7 @@ const RegisterForm = () => {
         console.log(formData);
     }
     return (
-        <div className='row mx-0 justify-content-start align-items-end align-items-lg-center register-form pt-md-5' style={{ height: "100vh", transform: "translateX(5%)" }}>
+        <div className="row mx-0 justify-content-start align-items-end align-items-lg-center register-form pt-md-5" style={{ height: "100vh", transform: "translateX(5%)" }}>
             <div className="col-lg-4 col-10 col-md-8 mx-lg-0 mx-auto">
                 <form onSubmit={handleSubmit}>
                     <div classsName='form-group'>

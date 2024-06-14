@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const useVerifyJWT = () => {
     const navigate = useNavigate();
+    const [isAuthenticated, setAuthenticated] = useState(null);
 
     useEffect(() => {
         const verifyToken = async () => {
@@ -11,6 +12,8 @@ const useVerifyJWT = () => {
 
             if (!token) {
                 console.error('No token found in localStorage');
+                setAuthenticated(false);
+                navigate('/');
                 return;
             }
 
@@ -20,18 +23,23 @@ const useVerifyJWT = () => {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                console.log(response);
-                if (response.status === 401) {
+                // console.log(response);
+                if (response.status === 200) {
+                    setAuthenticated(true);
+                    // navigate('/resume');
+                } else {
+                    setAuthenticated(false);
                     navigate('/');
                 }
 
             } catch (error) {
                 console.error('Error verifying token:', error.response?.data || error.message);
+                setAuthenticated(false);
             }
         };
         verifyToken();
     }, [navigate]);
 
-    return null;
+    return isAuthenticated;
 };
 export default useVerifyJWT;

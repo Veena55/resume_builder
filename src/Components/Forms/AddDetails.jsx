@@ -1,6 +1,6 @@
 import { FaCloudUploadAlt, FaPlus } from "react-icons/fa";
 import TextEditor from "./TextEditor";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -17,6 +17,7 @@ const AddDetails = () => {
     const [isExperienced, setExperience] = useState(false);
     const [isSocailMediaChecked, setSocailMediaChecked] = useState({ linkedin: false, github: false });
     const [formData, setFormData] = useState({});
+    const [isSubmit, setSubmit] = useState(false);
     const { template } = useParams();
     const navigate = useNavigate();
 
@@ -113,19 +114,29 @@ const AddDetails = () => {
         }
     }
 
+
+    useEffect(() => {
+        if (isSubmit) {
+            const sendFormData = async () => {
+                const res = await axios.post('http://localhost:5000/resume/create', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }, data: formData
+                });
+                if (res.status == 200) {
+                    console.log(res.data, `${template}/${res.data.id}  `);
+                    navigate(`/${template}/${res.data.id}`);
+                }
+            }
+            sendFormData();
+        }
+    }, [isSubmit, formData]);
+
     const handleSubmit = async (e) => {
+        e.preventDefault();
         const { fname, lname, email, mobile, address, portfolio, linkedin_url, github_url } = singleInputVal;
         setFormData({ ...formData, fname, lname, email, address, mobile, portfolio, linkedin_url, github_url, projectVal, skillVal, achievementVal, isExperienced, isSocailMediaChecked, isWorking, workExperienceVal, template });
-        e.preventDefault();
-        const res = await axios.post('http://localhost:5000/resume/create', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }, formData
-        });
-        if (res.status == 200) {
-            console.log(res.data, `${template}/${res.data.id}  `);
-            navigate(`/${template}/${res.data.id}`);
-        }
+        setSubmit(true);
     }
 
 

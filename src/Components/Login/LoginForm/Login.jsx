@@ -20,6 +20,9 @@ const LoginForm = () => {
 
             setUser(res.data.user);
             localStorage.setItem('token', res.data.token);
+            if (res.data.token) {
+                navigate('/resume');
+            }
         } catch (error) {
             console.error('Error verifying token', error);
         }
@@ -31,13 +34,6 @@ const LoginForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
     }
-    useEffect(() => {
-        setToken(localStorage.getItem('token'));
-        if (userToken) {
-            console.log(userToken);
-            // navigate('/resume');
-        }
-    }, [userToken]);
 
     return (
 

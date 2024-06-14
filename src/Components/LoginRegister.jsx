@@ -1,12 +1,14 @@
 
 import gsap from 'gsap';
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import RegisterForm from './Login/Register/RegisterForm';
 import LoginForm from './Login/LoginForm/Login';
 import Auth from '../assets/images/auth1.svg';
 import Auth2 from '../assets/images/auth2.svg';
+import { useNavigate } from 'react-router-dom';
 
 const LoginRegister = () => {
+    const navigate = useNavigate();
     const curve1 = useRef(null);
     const curve1_content = useRef(null);
     const curve2_content = useRef(null);
@@ -138,7 +140,14 @@ const LoginRegister = () => {
             y: 20
         })
     }
+    useEffect(() => {
 
+        if (localStorage.getItem('token')) {
+            console.log("hi");
+            navigate('/resume');
+        }
+
+    })
     return (
         <>
             <div className="auth-curve" id="authCover" ref={curve1}>

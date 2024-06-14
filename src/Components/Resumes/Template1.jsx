@@ -9,6 +9,8 @@ const Template1 = () => {
     const printRef = useRef();
     const { temp_id } = useParams();
     const [resume, setResume] = useState({});
+    let token = localStorage.getItem('token');
+    // console.log(token);
     const handlePrint = async () => {
         const element = printRef.current;
         const canvas = await html2canvas(element);
@@ -23,7 +25,11 @@ const Template1 = () => {
     // console.log(temp_id);
     const getData = async () => {
         try {
-            const template = await axios.get(`http://localhost:5000/resume/resume_details/${temp_id}`);
+            const template = await axios.get(`http://localhost:5000/resume/resume_details/${temp_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             const { result } = template.data;
             setResume(result);
             // console.log(result);
@@ -34,7 +40,6 @@ const Template1 = () => {
     console.log(resume);
     useEffect(() => {
         getData();
-        console.log("Hi");
     }, []);
 
     return (

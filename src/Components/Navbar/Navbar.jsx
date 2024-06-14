@@ -7,7 +7,7 @@ const Navbar = () => {
                 <h4 className="text-dark-theme">Logo</h4>
                 <ul>
                     <Link to='/' className="text-decoration-none mx-3 nav_link text-dark-theme">Home</Link>
-                    <Link to='/' className="text-decoration-none mx-3 nav_link text-dark-theme">My Resume</Link>
+                    <Link to='/resume' className="text-decoration-none mx-3 nav_link text-dark-theme">My Resume</Link>
                     <Link to='/' className="text-decoration-none mx-3 nav_link text-dark-theme">Logout</Link>
                 </ul>
             </div>
