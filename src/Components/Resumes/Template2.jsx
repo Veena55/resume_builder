@@ -8,12 +8,17 @@ import { useParams } from "react-router-dom";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-const Template2 = () => {
-    const { temp_id } = useParams();
+const Template2 = ({ tempId }) => {
     const [resume, setResume] = useState({});
     let token = localStorage.getItem('token');
     const printRef = useRef();
-
+    let temp_id = '';
+    if (tempId) {
+        temp_id = tempId;
+    } else {
+        temp_id = useParams().temp_id;
+    }
+    console.log(tempId, "hi");
     const handlePrint = async () => {
         const element = printRef.current;
         const canvas = await html2canvas(element);

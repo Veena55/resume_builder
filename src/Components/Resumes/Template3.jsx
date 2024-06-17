@@ -10,12 +10,19 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
-const Template3 = () => {
+const Template3 = ({ tempId }) => {
     const printRef = useRef();
-    const { temp_id } = useParams();
     const [resume, setResume] = useState({});
     let token = localStorage.getItem('token');
-    // console.log(token);
+    let temp_id = '';
+
+    if (tempId) {
+        temp_id = tempId;
+    } else {
+        temp_id = useParams().temp_id;
+    }
+    console.log(tempId, "hi");
+
     const handlePrint = async () => {
         const element = printRef.current;
         const canvas = await html2canvas(element);

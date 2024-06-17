@@ -8,7 +8,10 @@ import Navbar from "../Navbar/Navbar";
 import Resume from '../Resumes/Resume';
 import LoginRegister from "../LoginRegister";
 import useVerifyJWT from "../../utilities/useVerifyJWT";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 // Lazy load the Resume component
 // const LoginRegister = lazy(() => import("../LoginRegister"));
 const ProctectedRoute = ({ element }) => {
@@ -26,16 +29,17 @@ const ProctectedRoute = ({ element }) => {
 const Main = ({ children }) => {
     const location = useLocation();
     const showComponent = location.pathname != '/';
+
+
+
     return (
-        // <BrowserRouter>
         <div className="row bg-light mx-0 justify-content-between">
+            <ToastContainer />
             {showComponent && <Navbar></Navbar>}
             <div className="col-12 mx-auto">
                 {children}
-
             </div>
         </div>
-        // </BrowserRouter>
     )
 }
 

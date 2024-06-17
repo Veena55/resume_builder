@@ -5,10 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import { FaDotCircle } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 
-const Template1 = () => {
-    const printRef = useRef();
-    const { temp_id } = useParams();
+const Template1 = ({ tempId }) => {
     const [resume, setResume] = useState({});
+    const printRef = useRef();
+    let temp_id = '';
+    if (tempId) {
+        temp_id = tempId;
+    } else {
+        temp_id = useParams().temp_id;
+    }
+    console.log(tempId, "hi");
     let token = localStorage.getItem('token');
     // console.log(token);
     const handlePrint = async () => {
@@ -28,7 +34,6 @@ const Template1 = () => {
         //revert the element's width
         element.style.width = ""; // 
     }
-    // console.log(temp_id);
     const getData = async () => {
         try {
             const template = await axios.get(`http://localhost:5000/resume/resume_details/${temp_id}`, {
@@ -43,7 +48,7 @@ const Template1 = () => {
             console.error('Error fetching data:', error);
         }
     }
-    console.log(resume);
+    // console.log(resume);
     useEffect(() => {
         getData();
     }, []);

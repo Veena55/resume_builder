@@ -7,12 +7,19 @@ import { FaGoogle, FaLock } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
 import Variable from '../../../utilities/Variables';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const LoginForm = () => {
     const [user, setUser] = useState('');
-    const [userToken, setToken] = useState('');
+    // const [userToken, setToken] = useState('');
     const navigate = useNavigate();
     const { GOOGLE_CLIENT_ID } = Variable();
+
+    const notify = (msg) => {
+        return toast(msg);
+    }
+
     const handleSuccess = async (response) => {
         const { credential } = response;
         try {
@@ -21,6 +28,7 @@ const LoginForm = () => {
             setUser(res.data.user);
             localStorage.setItem('token', res.data.token);
             if (res.data.token) {
+                notify("Login Successfully!!");
                 navigate('/resume');
             }
         } catch (error) {
@@ -28,6 +36,7 @@ const LoginForm = () => {
         }
     }
     const handleFailure = (response) => {
+        notify("Login Failed! Please try again");
         console.log('Login Failed:', response);
     };
 
