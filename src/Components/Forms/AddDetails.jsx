@@ -59,6 +59,14 @@ const AddDetails = () => {
         setEducation([...education, {}]);
 
     }
+
+    const handleEducationValue = (e, index) => {
+        setEducationVal(prevState => {
+            const updatedEducationVal = [...prevState];
+            updatedEducationVal[index] = { ...updatedEducationVal[index], [e.target.name]: e.target.value };
+            return updatedEducationVal;
+        });
+    }
     //Add Input elements for skills
     const addSkillInput = (e) => {
         e.preventDefault();
@@ -169,7 +177,7 @@ const AddDetails = () => {
                 return;
             }
         }
-        setFormData({ ...formData, fname, lname, email, address, mobile, portfolio, linkedin_url, github_url, projectVal, skillVal, achievementVal, isExperienced, isSocailMediaChecked, isWorking, workExperienceVal, template });
+        setFormData({ ...formData, fname, lname, email, address, mobile, portfolio, linkedin_url, github_url, educationVal, projectVal, skillVal, achievementVal, isExperienced, isSocailMediaChecked, isWorking, workExperienceVal, template });
         setSubmit(true);
     }
 
@@ -228,11 +236,8 @@ const AddDetails = () => {
                                     return (
                                         <div key={index}>
                                             <input type="text" className="mt-3 form-control" placeholder="Title" name="e_name" onBlur={(e) => handleEducationValue(e, index)} />
-                                            <input type="text" className="mt-3 form-control" placeholder="Title" name="e_cgpa" onBlur={(e) => handleEducationValue(e, index)} />
-                                            <input type="date" className="mt-3 form-control" placeholder="Title" name="e_passing_year" onBlur={(e) => handleEducationValue(e, index)} />
-                                            {/* <div className="mt-3">
-                                                <textarea className="form-control" placeholder="Description..." name="e_descp" onBlur={(e) => handleEducationValue(e, index)} ></textarea>
-                                            </div> */}
+                                            <input type="text" className="mt-3 form-control" placeholder="Enter percentage/cgpa" name="e_cgpa" onBlur={(e) => handleEducationValue(e, index)} />
+                                            <input type="date" className="mt-3 form-control" placeholder="Passed out Year" name="e_passing_year" onBlur={(e) => handleEducationValue(e, index)} />
                                         </div>
                                     )
                                 })}
