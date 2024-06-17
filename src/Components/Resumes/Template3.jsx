@@ -176,7 +176,9 @@ const Template3 = () => {
                     </div>
                 </div>
             </div>
-            <button onClick={handlePrint}>Download</button>
+            <div className="text-center">
+                <button onClick={handlePrint} className="btn bg-theme shadow my-3">Download</button>
+            </div>
         </>
     )
 }

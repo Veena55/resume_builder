@@ -1,3 +1,4 @@
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import axios from 'axios';
 import React, { useState } from 'react';
 // import '../../assets/style.css';
@@ -5,12 +6,38 @@ import { FaEnvelope, FaGoogle, FaLock } from "react-icons/fa";
 
 import { FaUser } from "react-icons/fa";
 
+import Variable from '../../../utilities/Variables';
+import { useNavigate } from 'react-router-dom';
+
 const RegisterForm = () => {
+    const [user, setUser] = useState();
+    const navigate = useNavigate();
+    const { GOOGLE_CLIENT_ID } = Variable();
     const [formData, setFormData] = useState({ username: '', email: '', password: '', cpassword: '' });
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value })
     }
+
+    const handleSuccess = async (response) => {
+        const { credential } = response;
+        try {
+            const res = await axios.post('http://localhost:5000/auth/verify_token', { token: credential });
+
+            setUser(res.data.user);
+            localStorage.setItem('token', res.data.token);
+            if (res.data.token) {
+                navigate('/resume');
+            }
+        } catch (error) {
+            console.error('Error verifying token', error);
+        }
+    }
+    const handleFailure = (response) => {
+        console.log('Login Failed:', response);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.email != '' || formData.password != '') {
@@ -55,9 +82,21 @@ const RegisterForm = () => {
                 <div className='my-3'>
                     <p className='text-center fw-medium'>OR</p>
                 </div>
-                <div className='form-group mt-3 text-center'>
-                    <button className='btn cta-btn-2 rounded-5 py-2 w-100'>Register with <FaGoogle /></button>
-                </div>
+                <button to='http://localhost:5000/auth/google' className='btn cta-btn-2 w-100 justify-content-center rounded-5 py-1 d-flex align-items-center gap-2'>
+                    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID} nonce=''>
+                        <GoogleLogin
+                            onSuccess={handleSuccess}
+                            onError={handleFailure}
+                            text='Login With'
+                            type='icon'
+                            shape="pill"
+                            promp="account_select"
+                            useOneTap
+                            auto_select
+                        />
+                    </GoogleOAuthProvider>
+                    <span> Register</span>
+                </button>
             </div>
         </div>
     )

@@ -13,6 +13,9 @@ const Template1 = () => {
     // console.log(token);
     const handlePrint = async () => {
         const element = printRef.current;
+        // Temporarily set the element's width for PDF generation
+        element.style.width = "1000px"; // Set a fixed width that works well for the PDF
+
         const canvas = await html2canvas(element);
         const data = canvas.toDataURL("image/png");
         const pdf = new jsPDF("p", "mm", "a4");
@@ -21,13 +24,16 @@ const Template1 = () => {
         const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
         pdf.addImage(data, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save('download.pdf');
+
+        //revert the element's width
+        element.style.width = ""; // 
     }
     // console.log(temp_id);
     const getData = async () => {
         try {
             const template = await axios.get(`http://localhost:5000/resume/resume_details/${temp_id}`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'authorization': `Bearer ${token}`
                 }
             });
             const { result } = template.data;
@@ -79,7 +85,7 @@ const Template1 = () => {
                                 <div className="d-flex justify-content-between py-2 flex-wrap">
                                     <div>
                                         {(resume.skills).map((element, index) => {
-                                            return <li className="my-0">{element}</li>
+                                            return <li className="my-0" key={index}>{element}</li>
                                         })}
                                     </div>
                                 </div>
@@ -128,7 +134,7 @@ const Template1 = () => {
                                 <div className="d-flex justify-content-between py-2 flex-wrap">
                                     <div>
                                         {(resume.projects).map((element, index) => {
-                                            return (<div className="pt-1">
+                                            return (<div className="pt-1" key={index}>
                                                 <p className="fw-medium mb-0">{element.p_name}</p>
                                                 <p className="mt-1">{element.p_descp}</p>
                                             </div>)
@@ -164,7 +170,7 @@ const Template1 = () => {
                                         <h5 className="text-uppercase">Achievements & Certifications</h5>
                                         {(resume.achievements).map((element, index) => {
                                             return (
-                                                <div className="pt-2">
+                                                <div className="pt-2" key={index}>
                                                     <p className="fw-medium mb-0">{element.a_name}</p>
                                                     <p className="mt-1">{element.a_descp}</p>
                                                 </div>
@@ -177,7 +183,9 @@ const Template1 = () => {
                     </div>
                 </div>
             </div>
-            <button onClick={handlePrint}>Download</button>
+            <div className="text-center">
+                <button onClick={handlePrint} className="btn bg-theme shadow my-3">Download</button>
+            </div>
         </>
     )
 }

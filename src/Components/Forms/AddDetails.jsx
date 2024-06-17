@@ -7,6 +7,8 @@ import { useNavigate, useParams } from "react-router-dom";
 const AddDetails = () => {
     const [projects, setProjects] = useState([{ p_name: '', p_descp: '' }]);
     const [projectVal, setProjectVal] = useState([{ p_name: '', p_descp: '' }]);
+    const [education, setEducation] = useState([{ e_name: '', e_passing_year: '', e_cgpa: '' }]);
+    const [educationVal, setEducationVal] = useState([{ e_name: '', e_passing_year: '', e_cgpa: '' }]);
     const [skills, setSkills] = useState(['']);
     const [skillVal, setSkillVal] = useState('');
     const [achievements, setAchievements] = useState([{ a_name: '', a_descp: '' }]);
@@ -18,6 +20,8 @@ const AddDetails = () => {
     const [isSocailMediaChecked, setSocailMediaChecked] = useState({ linkedin: false, github: false });
     const [formData, setFormData] = useState({});
     const [isSubmit, setSubmit] = useState(false);
+    const [file, setFile] = useState('');
+    const [filename, setFilename] = useState('Choose File');
     const { template } = useParams();
     const navigate = useNavigate();
 
@@ -47,6 +51,13 @@ const AddDetails = () => {
             updatedProjectValue[index] = { ...updatedProjectValue[index], [name]: value };
             return updatedProjectValue;
         });
+    }
+
+    //Add Input elements for projects
+    const addEducationInput = (e) => {
+        e.preventDefault();
+        setEducation([...education, {}]);
+
     }
     //Add Input elements for skills
     const addSkillInput = (e) => {
@@ -114,19 +125,35 @@ const AddDetails = () => {
         }
     }
 
+    const handleFileInput = (e) => {
+        setFile(e.target.files[0]);
+        setFilename(e.target.files[0].name);
+    }
 
     useEffect(() => {
         if (isSubmit) {
             const sendFormData = async () => {
-                const res = await axios.post('http://localhost:5000/resume/create', {
+                const res = await axios.post('http://localhost:5000/resume/create', { data: formData }, {
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                    }, data: formData
+                        'authorization': `Bearer ${token}`
+                    }
                 });
-                if (res.status == 200) {
-                    console.log(res.data, `${template}/${res.data.id}  `);
-                    navigate(`/${template}/${res.data.id}`);
+                const resumeId = res.data.id;
+                // If file exists, upload it to /upload/file
+                if (file) {
+                    console.log("exists");
+                    const formDataToSend = new FormData();
+                    formDataToSend.append('image', file);
+                    formDataToSend.append('resumeId', resumeId);
+                    let result = await axios.post('http://localhost:5000/upload/file', formDataToSend, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    });
+                    console.log(result);
                 }
+                navigate(`/${template}/${resumeId}`);
             }
             sendFormData();
         }
@@ -135,6 +162,13 @@ const AddDetails = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const { fname, lname, email, mobile, address, portfolio, linkedin_url, github_url } = singleInputVal;
+        if (template == 'temp2' || template == 'temp3') {
+            console.log(file);
+            if (file == '') {
+                console.log("Can't Submit");
+                return;
+            }
+        }
         setFormData({ ...formData, fname, lname, email, address, mobile, portfolio, linkedin_url, github_url, projectVal, skillVal, achievementVal, isExperienced, isSocailMediaChecked, isWorking, workExperienceVal, template });
         setSubmit(true);
     }
@@ -185,6 +219,27 @@ const AddDetails = () => {
                             <label className="text-secondary" htmlFor="">Select : </label><br></br>
                             <span className="ms-3"><input type="radio" value="experienced" name="experience" onChange={handleExperience} /> Experienced</span>
                             <span className="ms-3"><input type="radio" value='fresher' name="experience" onChange={handleExperience} /> Freseher</span>
+                        </div>
+
+                        <div className="form-group mt-3">
+                            <label>Education Details</label>
+                            <div className="border p-3">
+                                {education.map((ele, index) => {
+                                    return (
+                                        <div key={index}>
+                                            <input type="text" className="mt-3 form-control" placeholder="Title" name="e_name" onBlur={(e) => handleEducationValue(e, index)} />
+                                            <input type="text" className="mt-3 form-control" placeholder="Title" name="e_cgpa" onBlur={(e) => handleEducationValue(e, index)} />
+                                            <input type="date" className="mt-3 form-control" placeholder="Title" name="e_passing_year" onBlur={(e) => handleEducationValue(e, index)} />
+                                            {/* <div className="mt-3">
+                                                <textarea className="form-control" placeholder="Description..." name="e_descp" onBlur={(e) => handleEducationValue(e, index)} ></textarea>
+                                            </div> */}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            <div className="mt-3 text-end">
+                                <button className="btn bg-theme" onClick={addEducationInput}><FaPlus></FaPlus> Add More</button>
+                            </div>
                         </div>
 
                         {isExperienced &&
@@ -260,13 +315,14 @@ const AddDetails = () => {
                                 <button className="btn bg-theme" onClick={addAchievementInput}><FaPlus></FaPlus> Add More</button>
                             </div>
                         </div>
-                        <div className="form-group">
+                        {(template == 'temp2' || template == 'temp3') && <div className="form-group">
                             <label>Upload Your Image</label>
                             <label className="d-block text-secondary" htmlFor="file-input">
                                 <FaCloudUploadAlt className="text-theme-color" size={80} />
                             </label>
-                            <input type="file" id="file-input" style={{ display: 'none' }} className="form-control" />
-                        </div>
+                            <input type="file" name='image' id="file-input" style={{ display: 'none' }} className="form-control" onChange={handleFileInput} />
+                        </div>}
+
                         <div className="mt-3">
                             <button className="btn bg-theme form-control">Submit</button>
                         </div>

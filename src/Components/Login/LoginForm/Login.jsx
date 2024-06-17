@@ -6,13 +6,13 @@ import { FaGoogle, FaLock } from "react-icons/fa";
 
 import { FaUser } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
+import Variable from '../../../utilities/Variables';
 
 const LoginForm = () => {
     const [user, setUser] = useState('');
     const [userToken, setToken] = useState('');
     const navigate = useNavigate();
-    const clientId = "745276498734-9aod2ug3nq6d6261uh1j64cba6cv1ogl.apps.googleusercontent.com";
-
+    const { GOOGLE_CLIENT_ID } = Variable();
     const handleSuccess = async (response) => {
         const { credential } = response;
         try {
@@ -70,7 +70,7 @@ const LoginForm = () => {
                 <div className='form-group mt-3 text-center'>
                     <div className='mt-2'></div>
                     <button to='http://localhost:5000/auth/google' className='btn cta-btn-2 w-100 justify-content-center rounded-5 py-1 d-flex align-items-center gap-2'>
-                        <GoogleOAuthProvider clientId={clientId} nonce=''>
+                        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID} nonce=''>
                             <GoogleLogin
                                 onSuccess={handleSuccess}
                                 onError={handleFailure}
