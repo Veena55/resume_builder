@@ -16,14 +16,64 @@ const Template3 = ({ tempId }) => {
     let token = localStorage.getItem('token');
     let temp_id = '';
 
-    if (tempId) {
-        temp_id = tempId;
-    } else {
-        temp_id = useParams().temp_id;
-    }
-    console.log(tempId, "hi");
+    temp_id = useParams().temp_id;
+
+    const imageToBase64 = (url) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const dataURL = canvas.toDataURL('image/png');
+                resolve(dataURL);
+            };
+            img.onerror = (error) => {
+                reject(error);
+            };
+            img.src = url;
+        });
+    };
 
     const handlePrint = async () => {
+        const imageUrl = `http://localhost:5000/uploads/${resume.image}`;
+        let base64Image = '';
+
+        try {
+            base64Image = await imageToBase64(imageUrl);
+        } catch (error) {
+            console.error('Error converting image to base64:', error);
+        }
+
+        // Wait for all images to be fully loaded
+        const loadImages = () => {
+            return new Promise((resolve) => {
+                const images = document.querySelectorAll('img');
+                let loadedCount = 0;
+                const totalImages = images.length;
+                images.forEach((image) => {
+                    if (image.complete) {
+                        loadedCount++;
+                        if (loadedCount === totalImages) {
+                            resolve();
+                        }
+                    } else {
+                        image.onload = () => {
+                            loadedCount++;
+                            if (loadedCount === totalImages) {
+                                resolve();
+                            }
+                        };
+                    }
+                });
+            });
+        };
+
+        await loadImages();
+
         const element = printRef.current;
         const canvas = await html2canvas(element);
         const data = canvas.toDataURL("image/png");
@@ -32,12 +82,23 @@ const Template3 = ({ tempId }) => {
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
         pdf.addImage(data, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+        if (base64Image) {
+            // Add the image to the PDF at the desired position and size
+            const imgWidth = 30;// Width in mm
+            const imgHeight = 30; // Height in mm
+            const xPos = 10; // X position in mm
+            const yPos = 0; // Y position in mm
+            pdf.addImage(base64Image, 'PNG', xPos, yPos, imgWidth, imgHeight);
+        }
+
         pdf.save('download.pdf');
-    }
+    };
 
     const getData = async () => {
+        const templateId = tempId || temp_id;
         try {
-            const template = await axios.get(`http://localhost:5000/resume/resume_details/${temp_id}`, {
+            const template = await axios.get(`http://localhost:5000/resume/resume_details/${templateId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -59,15 +120,13 @@ const Template3 = ({ tempId }) => {
                 <div className="col-12 mx-auto p-5 border border-2 border-dark">
                     <div className="row mx-0 justify-content-between align-items-center">
                         <div className="col-3">
-                            <div className="rounded-circle template_profile_img_cover bg-light shadow">
-                                <img src={Model} className="object-contain rounded-circle" width="150" height="150" alt="model_photo" />
-                            </div>
+                            {resume.image && <div className="rounded-circle template_profile_img_cover bg-light shadow">
+                                <img src={`http://localhost:5000/uploads/${resume.image}`} className="object-contain rounded-circle" width="150" height="150" alt="my_profile" />
+                            </div>}
                         </div>
                         <div className="col-9">
                             <div>
                                 {resume.fname && <h1 className="fw-bold">{resume.fname}</h1>}
-
-                                {/* <p className="fs-4">Graphics Designer</p> */}
                             </div>
                             <div className="d-flex flex-wrap gap-3 pt-3">
                                 {resume.mobile && <div>
@@ -94,19 +153,22 @@ const Template3 = ({ tempId }) => {
                     <div className="row mx-0 pt-5">
                         <div className="col-3 pe-5 border-end border-3 border-dark">
                             <div>
-                                <h4 className="fw-bold text-uppercase py-1 bg-dark text-white text-center shadow mb-3">Education</h4>
-                                <div className="pt-1">
-                                    <h6 className="fw-bold mb-0">HSBC University</h6>
-                                    <p>2005-2006</p>
-                                </div>
-                                <div className="pt-1">
-                                    <h6 className="fw-bold mb-0">HSBC University</h6>
-                                    <p>2005-2006</p>
-                                </div>
-                                <div className="pt-1">
-                                    <h6 className="fw-bold mb-0">HSBC University</h6>
-                                    <p>2005-2006</p>
-                                </div>
+                                {resume.education && (resume.education)[0].e_name &&
+                                    <>
+                                        <h4 className="fw-bold text-uppercase py-1 bg-dark text-white text-center shadow mb-3">Education</h4>
+                                        {(resume.education).map((element, index) => {
+                                            return (
+                                                <div className="pt-1">
+                                                    <h6 className="fw-bold mb-0">{element.e_name}</h6>
+                                                    <p className="mb-0 fw-semibold">{element.e_institue}</p>
+                                                    <p>Passing Year - {element.e_passing_year}</p>
+                                                </div>
+                                            )
+                                        })}
+                                    </>
+                                }
+
+
                                 <div>
                                     {resume.skills && <>
                                         <h4 className="fw-bold text-uppercase py-1 bg-dark text-white text-center shadow mb-32">Skills</h4>
@@ -118,7 +180,7 @@ const Template3 = ({ tempId }) => {
                                     </>
                                     }
                                 </div>
-                                {resume.achievements &&
+                                {resume.achievements && (resume.achievements)[0].a_name &&
                                     <div>
                                         <h4 className="fw-bold text-uppercase py-1 bg-dark text-white text-center shadow my-3">Achievement</h4>
                                         <div className="ms-2">
@@ -131,49 +193,30 @@ const Template3 = ({ tempId }) => {
                             </div>
                         </div>
                         <div className="col-8 ms-5">
-                            <div>
+                            {resume.bio && <div>
                                 <h4 className="fw-bold text-uppercase py-1 bg-dark text-white text-center shadow mb-3">Bio</h4>
                                 <p className="text-justify">{resume.bio}</p>
-                            </div>
-                            {resume.isExperienced &&
+                            </div>}
+
+                            {resume.isExperienced && (resume.experienced)[0].w_name &&
                                 <div>
                                     <h4 className="fw-bold text-uppercase py-1 bg-dark text-white text-center shadow mb-3">Work Experience</h4>
-                                    <div className="d-flex justify-content-between pt-4">
-                                        <div>
-                                            <h6 className="fw-bold">Ginyard Internation.co</h6>
-                                            <p className="mb-1">Product Design Manager</p>
-                                            <li>Working with the wider development team.</li>
-                                            <li>Working with the wider development team.</li>
-                                        </div>
-                                        <div>
-                                            <h6 className="fw-bold">2022 - 2023</h6>
-                                        </div>
-                                    </div>
-                                    <div className="d-flex justify-content-between pt-4">
-                                        <div>
-                                            <h6 className="fw-bold">Ginyard Internation.co</h6>
-                                            <p className="mb-1">Product Design Manager</p>
-                                            <li>Working with the wider development team.</li>
-                                            <li>Working with the wider development team.</li>
-                                        </div>
-                                        <div>
-                                            <h6 className="fw-bold">2022 - 2023</h6>
-                                        </div>
-                                    </div>
-                                    <div className="d-flex justify-content-between pt-4">
-                                        <div>
-                                            <h6 className="fw-bold">Ginyard Internation.co</h6>
-                                            <p className="mb-1">Product Design Manager</p>
-                                            <li>Working with the wider development team.</li>
-                                            <li>Working with the wider development team.</li>
-                                        </div>
-                                        <div>
-                                            <h6 className="fw-bold">2022 - 2023</h6>
-                                        </div>
-                                    </div>
+                                    {(resume.experienced).map((element, index) => {
+                                        return (
+                                            <div className="d-flex justify-content-between pt-4">
+                                                <div>
+                                                    <h6 className="fw-bold">{element.w_name}</h6>
+                                                    <p className="mb-1">{element.w_descp}</p>
+                                                </div>
+                                                <div>
+                                                    <h6 className="fw-bold">{element.w_from} - {(new Date(element.w_to).getFullYear() === new Date().getFullYear()) ? "Present" : new Date(element.w_to).getFullYear()}</h6> <h6 className="fw-bold">2022 - 2023</h6>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
                                 </div>
                             }
-                            {resume.projects &&
+                            {resume.projects && (resume.projects)[0].p_name &&
                                 <div className="mt-5">
                                     <h4 className="fw-bold text-uppercase py-1 bg-dark text-white text-center shadow mb-3">Projects</h4>
                                     {(resume.projects).map((project, index) => <li key={index} className="pt-2">{project.p_name}</li>)}

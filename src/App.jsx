@@ -1,4 +1,4 @@
-import { Route, BrowserRouter, Routes } from 'react-router-dom';
+import { Route, BrowserRouter, Routes, useNavigate } from 'react-router-dom';
 import '../src/assets/css/style.css';
 import LoginRegister from "./Components/LoginRegister";
 import Resume from './Components/Resumes/Resume';
@@ -13,20 +13,20 @@ import Main from './Components/Main/Main';
 import useVerifyJWT from './utilities/useVerifyJWT';
 import MyResume from './Components/Resumes/MyResume';
 
-function App() {
-
-  const ProctectedRoute = ({ element }) => {
-    const isAuthenticated = useVerifyJWT();
-    console.log(isAuthenticated);
-    if (isAuthenticated === null) {
-      // Show a fallback while the authentication status is being verified
-      return <div>Loading...</div>;
-    }
-    if (!isAuthenticated) {
-      return <Navigate to='/'></Navigate>
-    }
-    return element
+const ProctectedRoute = ({ element }) => {
+  const navigate = useNavigate();
+  const isAuthenticated = useVerifyJWT();
+  // console.log(isAuthenticated);
+  if (isAuthenticated === null) {
+    // Show a fallback while the authentication status is being verified
+    return <div>Loading...</div>;
   }
+  if (!isAuthenticated) {
+    return navigate("/");
+  }
+  return element
+}
+function App() {
 
   return (
     <>

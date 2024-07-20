@@ -2,7 +2,7 @@ import axios from "axios";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useEffect, useRef, useState } from "react";
-import { FaDotCircle } from "react-icons/fa";
+import { FaDotCircle, FaGithub, FaLinkedin } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 
 const Template1 = ({ tempId }) => {
@@ -29,7 +29,7 @@ const Template1 = ({ tempId }) => {
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
         pdf.addImage(data, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('download.pdf');
+        pdf.save('resume.pdf');
 
         //revert the element's width
         element.style.width = ""; // 
@@ -43,7 +43,7 @@ const Template1 = ({ tempId }) => {
             });
             const { result } = template.data;
             setResume(result);
-            // console.log(result);
+            console.log(result);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -66,7 +66,9 @@ const Template1 = ({ tempId }) => {
                                 <p className="mb-1"><FaDotCircle size={6} /> {resume.email}</p>
                                 {resume.linkedin_url && <p className="mb-1"><FaDotCircle size={6} /> {resume.linkedin_url}</p>}
                             </ul>
-                            {resume.address && <p>{resume.address}</p>}
+                            {resume.address && <p className="mb-1">{resume.address}</p>}
+                            {resume.linkedin && <p className="mb-1"><FaLinkedin /> {resume.linkedin}</p>}
+                            {resume.github && <p className="mb-1"><FaGithub /> {resume.github}</p>}
                         </div>
                     </div>
                     <div className="border border-1 border-black"></div>
@@ -98,40 +100,32 @@ const Template1 = ({ tempId }) => {
                         </div>
                         <div className="border border-1 border-black mt-4"></div>
                     </>)}
-                    {resume.isExperienced && (<>
-                        <div className="col-12">
-                            <h4 className="text-uppercase pt-3">Professional Experience</h4>
-                            <div className="row mx-0 mt-3">
-                                <div className="col-6">
-                                    <h6>Experience1</h6>
+                    {resume.isExperienced && (resume.experienced)[0].w_name && <>
+                        <h4 className="text-uppercase pt-3">Professional Experience</h4>
+                        {(resume.experienced).map((element, index) => {
+                            return (<><div className="col-12">
+                                <div className="row mx-0 mt-3">
+                                    <div className="col-6">
+                                        <h6>{element.w_name}</h6>
+                                    </div>
+                                    <div className="col-6 text-end">
+                                        <h6 className="fw-bold">{element.w_from} - {(new Date(element.w_to).getFullYear() === new Date().getFullYear()) ? "Present" : new Date(element.w_to).getFullYear()}</h6>
+                                    </div>
                                 </div>
-                                <div className="col-6 text-end">
-                                    <h6>Oct 2023 - Present</h6>
-                                </div>
-                            </div>
-                            <div className="row mx-0">
-                                <div className="col-12">
-                                    <h6>Business Analyst Intern</h6>
-                                    <p className="text-justify">Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae in inventore accusamus corporis porro quibusdam ea. Eveniet corporis qui aliquam ab amet accusantium voluptate suscipit. Necessitatibus provident pariatur recusandae eos, similique, placeat laudantium voluptas odit nulla sapiente officia eum nemo impedit maxime labore veniam voluptatum sed porro, autem dolorem assumenda ullam natus! Assumenda doloribus excepturi, neque recusandae exercitationem accusamus at.</p>
-                                </div>
-                            </div>
-                            <div className="row mx-0 mt-3">
-                                <div className="col-6">
-                                    <h6>Experience2</h6>
-                                </div>
-                                <div className="col-6 text-end">
-                                    <h6>Oct 2023 - Present</h6>
+                                <div className="row mx-0">
+                                    <div className="col-12">
+                                        <h6>{element.w_role}</h6>
+                                        <p className="text-justify">{element.w_descp}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="row mx-0">
-                                <div className="col-12">
-                                    <h6>Business Analyst Intern</h6>
-                                    <p className="text-justify">Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae in inventore accusamus corporis porro quibusdam ea. Eveniet corporis qui aliquam ab amet accusantium voluptate suscipit. Necessitatibus provident pariatur recusandae eos, similique, placeat laudantium voluptas odit nulla sapiente officia eum nemo impedit maxime labore veniam voluptatum sed porro, autem dolorem assumenda ullam natus! Assumenda doloribus excepturi, neque recusandae exercitationem accusamus at.</p>
-                                </div>
-                            </div>
-                        </div>
+                            </>
+                            )
+                        })}
                         <div className="border border-1 border-black mt-4"></div>
-                    </>)}
+                    </>}
+
+
                     {resume.projects && (<>
                         <div className="col-12 my-2">
                             <div>
@@ -152,24 +146,22 @@ const Template1 = ({ tempId }) => {
                     </>)}
                     <div className="col-12">
                         <div className="row mx-0 py-2">
-                            <div className="col-6 border-end border-3 border-dark">
+                            {resume.education && (resume.education)[0].e_name && <div className="col-6 border-end border-3 border-dark">
                                 <div className="pt-2">
                                     <h5 className="text-uppercase">Education</h5>
-                                    <div className="pt-2">
-                                        <p className="fw-medium mb-0">Bachelor Of Science</p>
-                                        <p className="mt-1">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate ab, maxime quibusdam tenetur ullam libero deserunt similique accusamus error a.</p>
-                                    </div>
+                                    {(resume.education).map((element, index) => {
+                                        return (<div className="pt-2" key={index}>
+                                            <p className="fw-medium mb-0">{element.e_name}</p>
+                                            <p className="mb-0"><strong>{element.e_institue}</strong> - {element.e_cgpa}</p>
+                                            <p className="mb-0">Passing Year - {element.e_passing_year}</p>
+                                        </div>
+                                        )
+                                    })}
                                 </div>
-                                <div className="pt-2">
-                                    <p className="fw-medium mb-0">Bachelor Of Science</p>
-                                    <p className="mt-1">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate ab, maxime quibusdam tenetur ullam libero deserunt similique accusamus error a.</p>
-                                </div>
-                                <div className="pt-2">
-                                    <p className="fw-medium mb-0">Bachelor Of Science</p>
-                                    <p className="mt-1">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate ab, maxime quibusdam tenetur ullam libero deserunt similique accusamus error a.</p>
-                                </div>
-                            </div>
-                            {resume.achievements && (<>
+
+                            </div>}
+
+                            {resume.achievements && (resume.achievements)[0].a_name && (<>
                                 <div className="col-6">
                                     <div className="pt-2">
                                         <h5 className="text-uppercase">Achievements & Certifications</h5>

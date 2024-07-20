@@ -5,6 +5,7 @@ import Template1 from "./Template1";
 import { IoMdClose } from "react-icons/io";
 import Template2 from "./Template2";
 import Template3 from "./Template3";
+import { toast } from "react-toastify";
 
 const MyResume = () => {
     const token = localStorage.getItem('token');
@@ -12,17 +13,18 @@ const MyResume = () => {
     const [showTemplate, setShowTemplate] = useState(false);
     const [templateNo, setTemplateNo] = useState(0);
     const [templateId, setTemplateId] = useState(0);
-    useEffect(() => {
-        async function getResume() {
-            const myResumes = await axios.get(`http://localhost:5000/resume/my_resume`, {
-                headers: {
-                    'authorization': `Bearer ${token}`
-                }
-            });
-            if (myResumes) {
-                setResume(myResumes.data.result);
+
+    const getResume = async () => {
+        const myResumes = await axios.get(`http://localhost:5000/resume/my_resume`, {
+            headers: {
+                'authorization': `Bearer ${token}`
             }
+        });
+        if (myResumes) {
+            setResume(myResumes.data.result);
         }
+    }
+    useEffect(() => {
         getResume();
     }, [token]);
 
@@ -34,14 +36,16 @@ const MyResume = () => {
 
     const deleteResume = async (templateId) => {
         const result = await axios.post(`http://localhost:5000/resume/delete`, { tempId: templateId }, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
+        if (result) {
+            toast.success("Resume Deleted!!");
+            getResume();
+        }
     }
-
+    console.log(resume);
     return (
-        <div className="">{
+        <div>{
             showTemplate ? <div className="overlow-scroll position-relative">
                 <div className="position-absolute end-0 z-3">
                     <button className="btn btn-danger" onClick={() => setShowTemplate(false)}><IoMdClose size={20} /></button>
@@ -54,7 +58,7 @@ const MyResume = () => {
                     <div className="col-10 mx-auto">
                         <h2 className="text-center py-5 text-dark-theme">My Resume</h2>
                         <div className="row mx-0 justify-content-center align-item-center">
-                            {resume && resume.map((ele, index) => {
+                            {resume.length == 0 ? <p className="text-danger text-center fs-4 fw-semibold inline">No Resume Found!!</p> : resume.map((ele, index) => {
                                 return (<div className="col-3 bg-white p-2 rounded-2 m-3 shadow-sm" key={index}>
                                     <div className="d-flex justify-content-between align-items-center">
                                         <img src={`./src/assets/images/${ele.template}.png`} className="p-1 rounded-2 border object-fit-fill" width={150} height={100} />

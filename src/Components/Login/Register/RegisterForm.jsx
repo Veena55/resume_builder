@@ -8,6 +8,7 @@ import { FaUser } from "react-icons/fa";
 
 import Variable from '../../../utilities/Variables';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const RegisterForm = () => {
     const [user, setUser] = useState();
@@ -24,8 +25,7 @@ const RegisterForm = () => {
         const { credential } = response;
         try {
             const res = await axios.post('http://localhost:5000/auth/verify_token', { token: credential });
-
-            setUser(res.data.user);
+            // setUser(res.data.user);
             localStorage.setItem('token', res.data.token);
             if (res.data.token) {
                 navigate('/resume');
@@ -40,36 +40,43 @@ const RegisterForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (formData.email != '' || formData.password != '') {
-            const res = axios.post('http://localhost:5000/auth/signup', formData);
-            console.log(res);
-            localStorage.setItem('token', res.data.token);
+        try {
+            if (formData.username != '' && formData.email != '' && formData.password != '' && formData.cpassword != '') {
+                const res = await axios.post('http://localhost:5000/auth/signup', formData);
+                console.log(res);
+                toast.success(res.data.message + "Please Login now!");
+            } else {
+                toast.error("Please fill all the details");
+            }
+            console.log(formData);
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response.data.message);
         }
-        console.log(formData);
     }
     return (
         <div className="row mx-0 justify-content-start align-items-end align-items-lg-center register-form pt-md-5" style={{ height: "100vh", transform: "translateX(5%)" }}>
             <div className="col-lg-4 col-10 col-md-8 mx-lg-0 mx-auto">
                 <form onSubmit={handleSubmit}>
-                    <div classsName='form-group'>
+                    <div className='form-group'>
                         <div className='d-flex align-items-center mb-3 input-cover'>
                             <FaUser className='text-secondary' />
                             <input type="text" className="authentication-input form-control fw-medium" name='username' placeholder='Enter your name' value={formData.username} onChange={handleChange} />
                         </div>
                     </div>
-                    <div classsName='form-group'>
+                    <div className='form-group'>
                         <div className='d-flex align-items-center mb-3 input-cover'>
                             <FaEnvelope className='text-secondary' />
                             <input type="text" className="authentication-input form-control fw-medium" name='email' placeholder='Enter your email' autoFocus value={formData.email} onChange={handleChange} />
                         </div>
                     </div>
-                    <div classsName='form-group'>
+                    <div className='form-group'>
                         <div className='d-flex align-items-center mb-3 input-cover'>
                             <FaLock className='text-secondary' />
                             <input type="password" className="authentication-input form-control fw-medium" name='password' placeholder='Enter your password' value={formData.password} onChange={handleChange} />
                         </div>
                     </div>
-                    <div classsName='form-group'>
+                    <div className='form-group'>
                         <div className='d-flex align-items-center mb-3 input-cover'>
                             <FaLock className='text-secondary' />
                             <input type="password" className="authentication-input form-control fw-medium" name='cpassword' placeholder='Enter your confrim password' value={formData.cpassword} onChange={handleChange} />
@@ -82,21 +89,22 @@ const RegisterForm = () => {
                 <div className='my-3'>
                     <p className='text-center fw-medium'>OR</p>
                 </div>
-                <button to='http://localhost:5000/auth/google' className='btn cta-btn-2 w-100 justify-content-center rounded-5 py-1 d-flex align-items-center gap-2'>
-                    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID} nonce=''>
-                        <GoogleLogin
-                            onSuccess={handleSuccess}
-                            onError={handleFailure}
-                            text='Login With'
-                            type='icon'
-                            shape="pill"
-                            promp="account_select"
-                            useOneTap
-                            auto_select
-                        />
-                    </GoogleOAuthProvider>
-                    <span> Register</span>
-                </button>
+                <div className="justify-content-center py-1 d-flex align-items-center">
+                    <button to='http://localhost:5000/auth/google' className='btn cta-btn rounded-circle p-2'>
+                        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID} nonce=''>
+                            <GoogleLogin
+                                onSuccess={handleSuccess}
+                                onError={handleFailure}
+                                text='Login With'
+                                type='icon'
+                                shape="pill"
+                                promp="account_select"
+                                useOneTap
+                                auto_select
+                            />
+                        </GoogleOAuthProvider>
+                    </button>
+                </div>
             </div>
         </div>
     )
